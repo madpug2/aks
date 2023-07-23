@@ -84,9 +84,9 @@
     </div>
 
     <div class="column">
-      <label for="languageDropdown2">Select another language:</label>
+      <label for="languageDropdown2">Select the Input language:</label>
       <select id="languageDropdown2">
-        <option value="">Select another language</option>
+        <option value="">Select the desired Output language</option>
         <option value="mulesoft">MuleSoft</option>
         <option value="tibco">Tibco</option>
         <option value="springBoot">Spring Boot</option>
@@ -153,19 +153,19 @@
       const language2 = languageDropdown2.value;
 
       if (!language1) {
-        errorMessage1.innerText = "Please select a language in Section 1.";
+        errorMessage1.innerText = "Please select an Input language.";
         loading.style.display = "none";
         return;
       }
 
       if (!code1) {
-        errorMessage1.innerText = "Please paste code in Section 1.";
+        errorMessage1.innerText = "Please paste the code .";
         loading.style.display = "none";
         return;
       }
 
       if (!language2) {
-        errorMessage2.innerText = "Please select a language in Section 2.";
+        errorMessage2.innerText = "Please an Output language.";
         loading.style.display = "none";
         return;
       }
