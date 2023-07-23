@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Code Interpreter</title>
+  <style>
+    body {
+      display: flex;
+    }
+
+    .left-column {
+      width: 50%;
+      padding: 20px;
+    }
+
+    .right-column {
+      width: 50%;
+      padding: 20px;
+    }
+
+    .column {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+    }
+
+    .error-message {
+      color: red;
+    }
+
+    #loading {
+      display: none;
+    }
+
+    pre {
+      white-space: pre-wrap;
+    }
+
+    .dropdown {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .button:hover {
+      background-color: #45a049;
+    }
+
+    .loading {
+      font-size: 16px;
+      font-weight: bold;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="left-column">
+    <div class="column">
+      <label for="languageDropdown1">Select the Input language</label>
+      <select id="languageDropdown1" class="dropdown">
+        <option value="">Select a language</option>
+        <option value="mulesoft">MuleSoft</option>
+        <option value="tibco">Tibco</option>
+        <option value="springBoot">Spring Boot</option>
+        <option value="java">Java</option>
+        <option value="iib">IIB</option>
+        <option value="python">Python</option>
+      </select>
+
+      <textarea id="codeBox1" placeholder="Paste your code here"></textarea>
+      <p class="error-message" id="errorMessage1"></p>
+    </div>
+
+    <div class="column">
+      <label for="languageDropdown2">Select the language to which your code has to be Interpreted</label>
+      <select id="languageDropdown2" class="dropdown">
+        <option value="">Select another language</option>
+      </select>
+      <p class="error-message" id="errorMessage2"></p>
+    </div>
+
+    <div class="column">
+      <button onclick="interceptAndDisplayResult()" class="button">Interpret</button>
+    </div>
+  </div>
+
+  <div class="right-column">
+    <div class="column">
+      <div class="loading" id="loading">Loading... Estimated wait time is 30 seconds</div>
+      <pre id="result"></pre>
+    </div>
+  </div>
+
+  <script>
+    const languageDropdown1 = document.getElementById("languageDropdown1");
+    const languageDropdown2 = document.getElementById("languageDropdown2");
+    const codeBox1 = document.getElementById("codeBox1");
+    const errorMessage1 = document.getElementById("errorMessage1");
+    const errorMessage2 = document.getElementById("errorMessage2");
+    const result = document.getElementById("result");
+    const loading = document.getElementById("loading");
+
+    function updateSection2Dropdown() {
+      const selectedLanguage1 = languageDropdown1.value;
+      languageDropdown2.innerHTML = "";
+
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "Select another language";
+      languageDropdown2.appendChild(option);
+
+      const languages = ["mulesoft", "tibco", "springBoot", "java", "iib", "python"];
+      for (const language of languages) {
+        if (language !== selectedLanguage1) {
+          const option = document.createElement("option");
+          option.value = language;
+          option.textContent = capitalizeFirstLetter(language);
+          languageDropdown2.appendChild(option);
+        }
+      }
+    }
+
+    function capitalizeFirstLetter(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    async function interceptAndDisplayResult() {
+      errorMessage1.innerText = "";
+      errorMessage2.innerText = "";
+      result.innerText = "";
+      loading.style.display = "block";
+
+      const language1 = languageDropdown1.value;
+      const code1 = codeBox1.value;
+      const language2 = languageDropdown2.value;
+
+      if (!language1) {
+        errorMessage1.innerText = "Please select a language in Section 1.";
+        loading.style.display = "none";
+        return;
+      }
+
+      if (!code1) {
+        errorMessage1.innerText = "Please paste code in Section 1.";
+        loading.style.display = "none";
+        return;
+      }
+
+      if (!language2) {
+        errorMessage2.innerText = "Please select a language in Section 2.";
+        loading.style.display = "none";
+        return;
+      }
+
+      try {
+        const requestUrl = `https://madpugGet.pythonanywhere.com/go?text=${encodeURIComponent(
+          `Interpret the given ${language1} code to ${language2} -> ${code1}`
+        )}`;
+        const response = await fetch(requestUrl);
+        if (!response.ok) {
+          throw new Error("API call failed");
+        }
+        const data = await response.text();
+        const formattedData = formatResponseData(data);
+        result.innerText = formattedData;
+      } catch (error) {
+        result.innerText = "Error occurred while fetching data.";
+        console.error(error);
+      } finally {
+        loading.style.display = "none";
+      }
+    }
+
+    function formatResponseData(data) {
+      // Replace \n with new lines
+      let formattedData = data.replace(/\\n/g, "\n");
+      // Replace \" with "
+      formattedData = formattedData.replace(/\\"/g, '"');
+      // Replace "outPut":
+      formattedData = formattedData.replace(/"outPut":/g, "");
+      return formattedData;
+    }
+
+    // Initialize Section 2 dropdown options excluding the selected language from Section 1
+    languageDropdown1.addEventListener("change", updateSection2Dropdown);
+  </script>
+</body>
+</html>
